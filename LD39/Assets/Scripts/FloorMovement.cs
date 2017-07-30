@@ -15,8 +15,8 @@ public class FloorMovement : MonoBehaviour {
 	}
 	
 	void LateUpdate () {
-		transform.localScale = new Vector3 (player.ball.mass, player.ball.mass, player.ball.mass);
-		renderer.material.mainTextureScale = new Vector2 (player.ball.mass, player.ball.mass);
+		transform.localScale = new Vector3 (player.ball.mass*2f, player.ball.mass*2f, player.ball.mass*2f);
+		renderer.material.mainTextureScale = new Vector2 (player.ball.mass*2f, player.ball.mass*2f);
 		float boundsX = bounds.size.x;// / renderer.sharedMaterial.mainTextureScale.x / player.ball.mass;
 		float boundsZ = bounds.size.z;// / renderer.sharedMaterial.mainTextureScale.y / player.ball.mass;
 		transform.position = new Vector3 (player.transform.position.x, 0, player.transform.position.z);

@@ -6,7 +6,7 @@ public class EnemyAI : MonoBehaviour {
 
 	public EnemySpawner spawner;
 
-	public float checkForTargetFrequency = 1.0f;
+	public float checkForTargetFrequency = 0.5f;
 	public float threatDistance;
 	public float criticalThreatDistance;
 
@@ -28,7 +28,7 @@ public class EnemyAI : MonoBehaviour {
 		movement = GetComponent<EnemyMovement> ();
 		Vector3 finalPos = Vector3.zero;
 
-		for (int i = 1; i < 100; i++) {
+		for (int i = 1; i < 200; i++) {
 			ball.mass = Random.Range (player.ball.mass * 0.5f, player.ball.mass * 2f);
 			float randX;
 			float randY;
@@ -53,10 +53,9 @@ public class EnemyAI : MonoBehaviour {
 			Vector3 spawnPos = Camera.main.ViewportToWorldPoint (new Vector3 (randX, randY, 1f));
 			finalPos = new Vector3 (spawnPos.x, ball.mass / 2.0f, spawnPos.z);
 
-			Collider[] hitColliders = Physics.OverlapSphere (finalPos, ball.mass / 2.0f);
-			if (hitColliders.Length == 0)
+			Collider[] hitColliders = Physics.OverlapSphere (finalPos, ball.mass*2);
+			if (hitColliders.Length == 0 && Vector3.Distance (spawnPos, player.transform.position) > ball.mass * 10)
 				break;
-			Debug.Log ("we hit others!");
 		}
 
 		transform.position = finalPos;
@@ -71,7 +70,7 @@ public class EnemyAI : MonoBehaviour {
 		float nearestDistTarget = Mathf.Infinity;
 		Ball[] objects = GameObject.FindObjectsOfType<Ball> ();
 		foreach (Ball ball in objects) {
-			if (ball == this.ball)
+			if (ball == this.ball || ball.dead)
 				continue;
 
 			float ballMassRatio = this.ball.mass / ball.mass;
@@ -104,13 +103,13 @@ public class EnemyAI : MonoBehaviour {
 		if (dead)
 			return;
 		Quaternion newRotationGoal = Quaternion.identity;
-		if (threat != null && nearestDistThreat <= threatDistance * threat.mass) {
+		if (threat != null && nearestDistThreat <= threatDistance * threatDistance * threat.mass) {
 			Vector3 lookPos = transform.position - threat.transform.position;
 			lookPos.y = 0;
 			newRotationGoal = Quaternion.LookRotation (lookPos);
 		}
 
-		if (target != null && (threat == null || nearestDistThreat > criticalThreatDistance * threat.mass)) {
+		if (target != null && (threat == null || nearestDistThreat > criticalThreatDistance * criticalThreatDistance * threat.mass)) {
 			Vector3 lookPos = target.transform.position - transform.position;
 			lookPos.y = 0;
 			newRotationGoal *= Quaternion.LookRotation (lookPos);
@@ -130,10 +129,12 @@ public class EnemyAI : MonoBehaviour {
 		if (dead)
 			return;
 		movement.fixedMovementResponsiveness = movement.movementResponsiveness / ball.mass;
-		movement.fixedMovementSpeed = movement.movementSpeed * ball.energy;
+		float adjustedMovementSpeed = Mathf.Max (movement.movementSpeed, movement.movementSpeed * player.ball.mass * 0.15f);
+		movement.fixedMovementSpeed = Mathf.Max (adjustedMovementSpeed / 2f, adjustedMovementSpeed * ball.energy);
 	}
 
 	void Die () {
+		ball.dead = true;
 		movement.enabled = false;
 		spawner.decrementEnemyCount ();
 		Destroy (this.gameObject);

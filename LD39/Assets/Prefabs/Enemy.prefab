@@ -142,6 +142,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mass: 0
+  energy: 0
+  dead: 0
 --- !u!114 &114500699950770406
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -158,6 +160,7 @@ MonoBehaviour:
   rotationSpeed: 180
   movementResponsiveness: 90
   fixedMovementResponsiveness: 0
+  fixedMovementSpeed: 0
   rotationGoal: {x: 0, y: 0, z: 0, w: 0}
 --- !u!114 &114787374911223196
 MonoBehaviour:
@@ -170,13 +173,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fe8b2b6c8e494bd4884d32a193ecd06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 114310354036552528, guid: e8b631dabf9114b7f81c6787f365a070, type: 2}
   spawner: {fileID: 0}
   checkForTargetFrequency: 1
-  threatDistance: 2
-  criticalThreatDistance: 1
+  threatDistance: 4
+  criticalThreatDistance: 2
   target: {fileID: 0}
-  threat: {fileID: 0}
+  threats: []
   dead: 0
 --- !u!135 &135489936132311968
 SphereCollider:

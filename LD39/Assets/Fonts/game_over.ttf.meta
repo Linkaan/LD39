@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: c4f3d92c5bd204b3f8d46aed5d934303
+timeCreated: 1501402782
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Game Over
+  fontNames:
+  - Game Over
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

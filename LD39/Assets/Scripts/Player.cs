@@ -8,8 +8,18 @@ public class Player : MonoBehaviour {
 	public Ball ball;
 	public ArrowPointAtEnemy threat_arrow;
 	public ArrowPointAtEnemy target_arrow;
+	public CameraMovement camMovement;
+
+	public AudioClip attackrollSfx;
+	public AudioClip eatSfx;
+	public AudioClip losingPowerSfx;
+	public AudioClip loseSfx;
+
+	public GameObject gameoverMenu;
 
 	public Image indicatorSlider;
+
+	public ScoreManager scoreManager;
 
 	public float checkForTargetFrequency = 0.2f;
 
@@ -18,7 +28,14 @@ public class Player : MonoBehaviour {
 
 	public float attackRollStartTime;
 
+	public float highestMass;
+	public float timeAlive;
+
 	private PlayerMovement movement;
+	private AudioSource audioSource;
+
+	private float lowEnergySFXInterval;
+	private float lastLowEnergyTime;
 
 	private bool attackRoll;
 
@@ -29,6 +46,7 @@ public class Player : MonoBehaviour {
 		ball = GetComponent<Ball> ();
 		ball.mass = 1.0f;
 		movement = GetComponent<PlayerMovement> ();
+		audioSource = GetComponent<AudioSource> ();
 
 		InvokeRepeating ("CheckForTarget", 0, checkForTargetFrequency);
 	}
@@ -42,7 +60,7 @@ public class Player : MonoBehaviour {
 		float nearestDistTarget = Mathf.Infinity;
 		Ball[] objects = GameObject.FindObjectsOfType<Ball> ();
 		foreach (Ball ball in objects) {
-			if (ball == this.ball)
+			if (ball == this.ball || ball.dead)
 				continue;
 
 			float ballMassRatio = this.ball.mass / ball.mass;
@@ -75,17 +93,33 @@ public class Player : MonoBehaviour {
 	}
 
 	void Update () {
+		if (dead)
+			return;
 		if (!attackRoll && Input.GetKeyDown (KeyCode.Space)) {
 			attackRoll = true;
+			camMovement.smoothTime /= 2.5f;
 			movement.BeginAttackRoll (ball.mass);
+			playAttackRollSFX ();
 			attackRollStartTime = Time.time;
 			ball.energy -= attackRollCost;
 		}
 
 		if (attackRoll && Time.time - attackRollStartTime >= attackRollDuration) {
+			camMovement.smoothTime *= 2.5f;
 			movement.EndAttackRoll ();
 			attackRoll = false;
 		}
+
+		if (ball.energy < 0.5f) {
+			lowEnergySFXInterval = Mathf.Max (0.2f, ball.energy * 3);
+			if (Time.time - lastLowEnergyTime >= lowEnergySFXInterval) {
+				lastLowEnergyTime = Time.time;
+				playLosingPowerFX ();
+			}
+		}
+
+		if (ball.mass > highestMass)
+			highestMass = ball.mass;
 	}
 
 	void LateUpdate () {
@@ -105,16 +139,44 @@ public class Player : MonoBehaviour {
 		if (dead)
 			return;
 		movement.fixedMovementResponsiveness = movement.movementResponsiveness / ball.mass;
-		movement.fixedMovementSpeed = Mathf.Max (1f, movement.movementSpeed * ball.energy);
+		//  Mathf.Min (yy, Mathf.Max (yy / 5f, yy / (player.GetComponent<Ball> ().mass * 0.15f)))
+		float adjustedMovementSpeed = Mathf.Max (movement.movementSpeed, movement.movementSpeed * ball.mass * 0.15f);
+		movement.fixedMovementSpeed = Mathf.Max (adjustedMovementSpeed / 2f, adjustedMovementSpeed * ball.energy);
+	}
+
+	public void playLoseSFX () {
+		audioSource.clip = loseSfx;
+		audioSource.Play ();
+	}
+
+	public void playEatSFX () {
+		audioSource.clip = eatSfx;
+		audioSource.Play ();
+	}
+
+	public void playAttackRollSFX () {
+		audioSource.clip = attackrollSfx;
+		audioSource.Play ();
+	}
+
+	public void playLosingPowerFX () {
+		if ((audioSource.isPlaying && audioSource.clip != losingPowerSfx))
+			return;
+		audioSource.clip = losingPowerSfx;
+		audioSource.Play ();
 	}
 
 	public void Die () {
+		timeAlive = Time.time;
+		scoreManager.UpdateTexts ();
+		ball.dead = true;
 		indicatorSlider.fillAmount = 0;
 		dead = true;
 		transform.localScale = new Vector3 (ball.mass, ball.mass, ball.mass);
 		Vector3 curPos = transform.position;
 		transform.localPosition = new Vector3 (curPos.x, ball.mass / 2.0f, curPos.z);
 		movement.enabled = false;
+		gameoverMenu.SetActive (true);
 		Destroy (this.movement.graphics.gameObject);
 	}
 }

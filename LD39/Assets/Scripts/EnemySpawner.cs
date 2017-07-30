@@ -13,11 +13,16 @@ public class EnemySpawner : MonoBehaviour {
 
 	public float curEnemyCount;
 
+	private Player player;
+
 	void Start () {
+		player = GameObject.FindObjectOfType<Player> ();
 		curEnemyCount = 0;
 	}
 
 	void Update () {
+		if (player.ball.dead)
+			return;
 		if (curEnemyCount < wantedEnemyCount) {
 			EnemyAI enemy = Instantiate (enemyPrefab).GetComponent<EnemyAI> ();
 			enemy.spawner = this;

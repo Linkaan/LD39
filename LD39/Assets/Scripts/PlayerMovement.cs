@@ -27,17 +27,34 @@ public class PlayerMovement : MonoBehaviour {
 		mousePos.z = transform.position.y;
 		Vector3 center = Camera.main.WorldToScreenPoint (transform.position);
 		//float inputAxisVertical = attackRollCompensation > 1 ? 1 : Input.GetAxis ("Vertical");
-		float inputAxisVertical = 1f; // attackRollCompensation > 1 ? 1 : Mathf.Min (1f, Mathf.Abs(center.x - mousePos.x) + Mathf.Abs(center.y - mousePos.y));
+		float inputAxisVertical = attackRollCompensation > 1 ? 1 : Mathf.Min (1f, Mathf.Max(0.5f, (Mathf.Abs(center.x - mousePos.x) + Mathf.Abs(center.y - mousePos.y)) / 100f));
 		mousePos = Camera.main.ScreenToWorldPoint (mousePos);
 
+		/*
 		Vector3 curPos = transform.position;
+		curPos.y = 0;
+		mousePos.y = 0;
 		Vector3 heading = curPos - mousePos;
-		Debug.Log (mousePos);
-		float angle = Mathf.Atan2 (heading.x, heading.z) * Mathf.Rad2Deg;
-		transform.rotation = Quaternion.AngleAxis (angle, Vector3.up);
+		heading.Normalize ();
+		*/
 
+		if (inputAxisVertical > 0.5f) {
+			Vector3 direction = new Vector3 (Input.mousePosition.x, Input.mousePosition.y) - center;
+			direction.Normalize ();
+			float angle = Mathf.Atan2 (direction.x, direction.y) * Mathf.Rad2Deg;
+			if (angle < 0) {
+				angle += 360;
+			}
+			transform.rotation = Quaternion.AngleAxis (angle, Vector3.up);
+		}
 
-		float translation = inputAxisVertical * fixedMovementSpeed * attackRollCompensation * Time.deltaTime;
+		float translation = 0.0f;
+		if (attackRollCompensation > 1f) {
+			translation = inputAxisVertical * movementSpeed * attackRollCompensation * Time.deltaTime;
+		} else {
+			translation = inputAxisVertical * fixedMovementSpeed * attackRollCompensation * Time.deltaTime;
+		}
+
 		//float rotation = Input.GetAxis ("Horizontal") * rotationSpeed * Time.deltaTime;
 		transform.Translate (0, 0, translation);
 		//transform.Rotate (0, rotation, 0);
