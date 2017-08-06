@@ -64,13 +64,13 @@ public class Player : MonoBehaviour {
 				continue;
 
 			float ballMassRatio = this.ball.mass / ball.mass;
-			if (ballMassRatio >= 1.25) {
+			if (ballMassRatio >= 1.25f && (ball.mass / this.ball.mass) > 0.1f) {
 				float distanceSqr = (ball.transform.position - transform.position).sqrMagnitude;
 				if (distanceSqr < nearestDistTarget) {
 					target = ball;
 					nearestDistTarget = distanceSqr;
 				}
-			} else if (ballMassRatio <= 0.8) {
+			} else if (ballMassRatio <= 0.8f) {
 				float distanceSqr = (ball.transform.position - transform.position).sqrMagnitude;
 				if (distanceSqr < nearestDistThreat) {
 					threat = ball;

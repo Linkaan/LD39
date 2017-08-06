@@ -32,7 +32,7 @@ public class EnemyMovement : MonoBehaviour {
 		// update ball rotation
 		graphics.LookAt (graphics.position + transform.forward);
 		Vector3 newRotation = graphics.eulerAngles;
-		xRotation += movementSpeed * Time.deltaTime * fixedMovementResponsiveness;
+		xRotation += fixedMovementSpeed * Time.deltaTime * fixedMovementResponsiveness;
 		newRotation.x = xRotation;
 		graphics.eulerAngles = newRotation;
 	}

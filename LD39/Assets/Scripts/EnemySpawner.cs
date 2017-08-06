@@ -20,7 +20,7 @@ public class EnemySpawner : MonoBehaviour {
 		curEnemyCount = 0;
 	}
 
-	void Update () {
+	void FixedUpdate () {
 		if (player.ball.dead)
 			return;
 		if (curEnemyCount < wantedEnemyCount) {

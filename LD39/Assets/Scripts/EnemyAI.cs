@@ -21,7 +21,10 @@ public class EnemyAI : MonoBehaviour {
 
 	private float nearestDistThreat;
 
-	void Start () {
+	private float initialMass;
+	private float spawnTime;
+
+	void Start () {		
 		dead = false;
 		player = GameObject.FindObjectOfType<Player> ();
 		ball = GetComponent<Ball> ();
@@ -59,6 +62,8 @@ public class EnemyAI : MonoBehaviour {
 		}
 
 		transform.position = finalPos;
+		spawnTime = Time.time;
+		initialMass = ball.mass;
 
 		InvokeRepeating ("CheckForTarget", 0, checkForTargetFrequency);
 	}
@@ -97,6 +102,11 @@ public class EnemyAI : MonoBehaviour {
 			dead = true;
 			Die ();
 		}
+		if (Time.time - spawnTime < 1) {
+			if (ball.mass != initialMass && ball.mass > 0) {
+				ball.mass = initialMass;
+			}
+		}
 	}
 
 	void LateUpdate () {
@@ -118,7 +128,7 @@ public class EnemyAI : MonoBehaviour {
 		Debug.DrawRay (transform.position, transform.position + newRotationGoal.eulerAngles * nearestDistThreat, Color.red);
 
 		movement.rotationGoal = newRotationGoal;
-		if (ball.mass > 0) {
+		if (ball.mass > 0 && Time.time - spawnTime >= 1) {
 			transform.localScale = new Vector3 (ball.mass, ball.mass, ball.mass);
 			Vector3 curPos = transform.position;
 			transform.localPosition = new Vector3 (curPos.x, ball.mass / 2.0f, curPos.z);
